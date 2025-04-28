@@ -12,3 +12,6 @@
 10. Hoàn tất đơn hàng
 
 **Lưu ý**: Có thể CANCEL ĐƠN trước khi SHIPPED
+
+
+LINK SƠ ĐỒ DATABASE:https://dbdiagram.io/d/HoaTuoiUIT-67fcc34a9cea6403819aba8f

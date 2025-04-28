@@ -25,9 +25,6 @@ public class Occasion {
     @Column(nullable = false)
     private Boolean isActive = true;
 
-    @Column(nullable = false, length = 100)
-    private String slug;
-
     @Column(name = "image_url", length = 255)
     private String imageUrl;
 }

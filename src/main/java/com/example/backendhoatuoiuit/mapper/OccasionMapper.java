@@ -13,7 +13,6 @@ public class OccasionMapper {
         dto.setName(occasion.getName());
         dto.setDescription(occasion.getDescription());
         dto.setIsActive(occasion.getIsActive());
-        dto.setSlug(occasion.getSlug());
         dto.setImageUrl(occasion.getImageUrl());
         return dto;
     }
@@ -24,7 +23,6 @@ public class OccasionMapper {
         occasion.setName(dto.getName());
         occasion.setDescription(dto.getDescription());
         occasion.setIsActive(dto.getIsActive());
-        occasion.setSlug(dto.getSlug());
         occasion.setImageUrl(dto.getImageUrl());
         return occasion;
     }

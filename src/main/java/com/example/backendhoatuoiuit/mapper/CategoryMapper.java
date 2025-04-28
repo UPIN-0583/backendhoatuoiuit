@@ -13,7 +13,6 @@ public class CategoryMapper {
         dto.setName(category.getName());
         dto.setDescription(category.getDescription());
         dto.setIsActive(category.getIsActive());
-        dto.setSlug(category.getSlug());
         return dto;
     }
 
@@ -23,7 +22,6 @@ public class CategoryMapper {
         category.setName(dto.getName());
         category.setDescription(dto.getDescription());
         category.setIsActive(dto.getIsActive());
-        category.setSlug(dto.getSlug());
         return category;
     }
 }

@@ -42,7 +42,6 @@ public class CategoryService {
         category.setName(categoryDTO.getName());
         category.setDescription(categoryDTO.getDescription());
         category.setIsActive(categoryDTO.getIsActive());
-        category.setSlug(categoryDTO.getSlug());
         category = categoryRepository.save(category);
         return categoryMapper.toDTO(category);
     }

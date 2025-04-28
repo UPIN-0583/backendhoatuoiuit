@@ -25,6 +25,4 @@ public class Category {
     @Column(nullable = false)
     private Boolean isActive = true;
 
-    @Column(nullable = false, length = 100)
-    private String slug;
 }

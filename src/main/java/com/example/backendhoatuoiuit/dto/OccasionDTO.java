@@ -8,6 +8,5 @@ public class OccasionDTO {
     private String name;
     private String description;
     private Boolean isActive;
-    private String slug;
     private String imageUrl;
 }
