@@ -1,0 +1,243 @@
+package com.example.backendhoatuoiuit.service;
+
+import com.example.backendhoatuoiuit.dto.OrderDTO;
+import com.example.backendhoatuoiuit.entity.*;
+import com.example.backendhoatuoiuit.mapper.OrderMapper;
+import com.example.backendhoatuoiuit.repository.CartRepository;
+import com.example.backendhoatuoiuit.repository.OrderProductRepository;
+import com.example.backendhoatuoiuit.repository.OrderRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class OrderService {
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private OrderProductRepository orderProductRepository;
+
+    @Autowired
+    private CartRepository cartRepository;
+
+    @Autowired
+    private OrderMapper orderMapper;
+
+    public List<OrderDTO> getAllOrders() {
+        return orderRepository.findAll().stream().map(orderMapper::toDTO).collect(Collectors.toList());
+    }
+
+    public OrderDTO getOrderById(Integer id) {
+        Order order = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
+        return orderMapper.toDTO(order);
+    }
+
+    public OrderDTO createOrder(OrderDTO orderDTO) {
+        Order order = orderMapper.toEntity(orderDTO);
+        order = orderRepository.save(order);
+        return orderMapper.toDTO(order);
+    }
+
+    public OrderDTO updateOrder(Integer id, OrderDTO orderDTO) {
+        Order order = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
+        order.setDeliveryDate(orderDTO.getDeliveryDate());
+        order.setDeliveryAddress(orderDTO.getDeliveryAddress());
+        order.setTotalAmount(orderDTO.getTotalAmount());
+        order.setStatus(OrderStatus.valueOf(orderDTO.getStatus()));
+        order.setNote(orderDTO.getNote());
+        if (orderDTO.getPaymentId() != null) {
+            Payment payment = new Payment();
+            payment.setId(orderDTO.getPaymentId());
+            order.setPayment(payment);
+        }
+        order = orderRepository.save(order);
+        return orderMapper.toDTO(order);
+    }
+
+    public void deleteOrder(Integer id) {
+        orderRepository.deleteById(id);
+    }
+
+    public BigDecimal getTotalRevenueByDate(LocalDate date) {
+        BigDecimal total = orderRepository.getTotalRevenueByDate(date);
+        return total != null ? total : BigDecimal.ZERO;
+    }
+
+    public BigDecimal getTotalRevenueByMonth(int month, int year) {
+        BigDecimal total = orderRepository.getTotalRevenueByMonth(month, year);
+        return total != null ? total : BigDecimal.ZERO;
+    }
+
+    public void updateTotalAmount(Integer orderId) {
+        BigDecimal total = orderProductRepository.calculateTotalAmountByOrderId(orderId);
+        total = (total != null) ? total : BigDecimal.ZERO;
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        order.setTotalAmount(total);
+        orderRepository.save(order);
+    }
+
+    public OrderDTO updateOrderStatus(Integer orderId, String newStatus) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        try {
+            OrderStatus status = OrderStatus.valueOf(newStatus.toUpperCase());
+            order.setStatus(status);
+            order = orderRepository.save(order);
+            return orderMapper.toDTO(order);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid order status: " + newStatus);
+        }
+    }
+
+    @Transactional
+    public OrderDTO createOrderFromCart(Integer customerId) {
+        // Tìm giỏ hàng theo customer
+        Cart cart = cartRepository.findByCustomerId(customerId)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+
+        if (cart.getItems().isEmpty()) {
+            throw new RuntimeException("Cart is empty, cannot create order");
+        }
+
+        // Tạo đơn hàng mới
+        Order newOrder = new Order();
+        Customer customer = new Customer();
+        customer.setId(customerId);
+        newOrder.setCustomer(customer);
+        newOrder.setOrderDate(LocalDateTime.now());
+        newOrder.setDeliveryAddress("");// hoặc để sau người dùng nhập
+        newOrder.setStatus(OrderStatus.PENDING);
+        newOrder.setTotalAmount(BigDecimal.ZERO); // tạm, lát nữa tính
+        newOrder = orderRepository.save(newOrder);
+
+        BigDecimal totalAmount = BigDecimal.ZERO;
+
+        // Chuyển từng sản phẩm trong cart thành order_product
+        for (CartItem cartItem : cart.getItems()) {
+            OrderProduct orderProduct = new OrderProduct();
+            orderProduct.setOrder(newOrder);
+            orderProduct.setProduct(cartItem.getProduct());
+            orderProduct.setQuantity(cartItem.getQuantity());
+            orderProduct.setPrice(cartItem.getProduct().getPrice());
+            orderProduct.setDiscountApplied(BigDecimal.ZERO);
+
+            orderProductRepository.save(orderProduct);
+
+            BigDecimal priceAfterDiscount = cartItem.getProduct().getPrice(); // chưa tính discount
+            totalAmount = totalAmount.add(priceAfterDiscount.multiply(BigDecimal.valueOf(cartItem.getQuantity())));
+        }
+
+        // Update tổng tiền đơn
+        newOrder.setTotalAmount(totalAmount);
+        orderRepository.save(newOrder);
+
+        // Clear cart (xoá hết cart_items)
+        cart.getItems().clear();
+        cartRepository.save(cart);
+
+        return orderMapper.toDTO(newOrder);
+    }
+
+    public OrderDTO updateDeliveryAddress(Integer orderId, String newAddress) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        order.setDeliveryAddress(newAddress);
+        order = orderRepository.save(order);
+
+        return orderMapper.toDTO(order);
+    }
+
+    public OrderDTO updatePaymentMethod(Integer orderId, Integer paymentId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        Payment payment = new Payment();
+        payment.setId(paymentId);
+
+        order.setPayment(payment);
+        order = orderRepository.save(order);
+
+        return orderMapper.toDTO(order);
+    }
+
+    public OrderDTO confirmOrder(Integer orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (order.getDeliveryAddress() == null || order.getDeliveryAddress().isBlank()) {
+            throw new RuntimeException("Delivery address is required before confirming order");
+        }
+        if (order.getPayment() == null) {
+            throw new RuntimeException("Payment method is required before confirming order");
+        }
+
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new RuntimeException("Only PENDING orders can be confirmed");
+        }
+
+        order.setStatus(OrderStatus.PROCESSING);
+        order = orderRepository.save(order);
+
+        return orderMapper.toDTO(order);
+    }
+
+    public OrderDTO cancelOrder(Integer orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (order.getStatus() == OrderStatus.SHIPPED || order.getStatus() == OrderStatus.DELIVERED) {
+            throw new RuntimeException("Cannot cancel shipped or delivered orders");
+        }
+
+        order.setStatus(OrderStatus.CANCELLED);
+        order = orderRepository.save(order);
+
+        return orderMapper.toDTO(order);
+    }
+
+    public OrderDTO shipOrder(Integer orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (order.getStatus() != OrderStatus.PROCESSING) {
+            throw new RuntimeException("Only orders in PROCESSING status can be shipped");
+        }
+
+        order.setStatus(OrderStatus.SHIPPED);
+        order = orderRepository.save(order);
+
+        return orderMapper.toDTO(order);
+    }
+
+    public OrderDTO markAsDelivered(Integer orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (order.getStatus() != OrderStatus.SHIPPED) {
+            throw new RuntimeException("Only orders in SHIPPED status can be marked as delivered");
+        }
+
+        order.setStatus(OrderStatus.DELIVERED);
+        order = orderRepository.save(order);
+
+        return orderMapper.toDTO(order);
+    }
+
+
+
+
+
+}
