@@ -49,4 +49,11 @@ public class CategoryService {
     public void deleteCategory(Integer id) {
         categoryRepository.deleteById(id);
     }
+
+    public List<CategoryDTO> getActiveCategories() {
+        return categoryRepository.findByIsActiveTrue()
+                .stream()
+                .map(categoryMapper::toDTO)
+                .collect(Collectors.toList());
+    }
 }

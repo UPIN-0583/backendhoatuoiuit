@@ -40,7 +40,6 @@ CREATE TABLE occasion (
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     INDEX idx_name (name),
     INDEX idx_is_active (is_active),
-    INDEX idx_slug (slug),
     CONSTRAINT unique_name UNIQUE (name),
     CONSTRAINT unique_slug UNIQUE (slug)
 );
@@ -53,7 +52,6 @@ CREATE TABLE categories (
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     INDEX idx_name (name),
     INDEX idx_is_active (is_active),
-    INDEX idx_slug (slug),
     CONSTRAINT unique_name UNIQUE (name),
     CONSTRAINT unique_slug UNIQUE (slug)
 );
@@ -96,14 +94,13 @@ CREATE TABLE products (
     price DECIMAL(10,2) NOT NULL CHECK (price >= 0),
     image_url VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
     category_id INT,
-    status ENUM('ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'ACTIVE',
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
     is_featured BOOLEAN NOT NULL DEFAULT FALSE,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL,
     INDEX idx_name (name),
-    INDEX idx_sku (sku),
-    INDEX idx_status (status),
+    INDEX idx_is_active (is_active),
     INDEX idx_category_id (category_id),
     INDEX idx_is_featured (is_featured),
     INDEX idx_price (price),

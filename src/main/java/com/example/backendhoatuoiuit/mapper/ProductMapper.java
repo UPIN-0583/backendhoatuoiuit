@@ -3,7 +3,6 @@ package com.example.backendhoatuoiuit.mapper;
 import com.example.backendhoatuoiuit.dto.ProductDTO;
 import com.example.backendhoatuoiuit.entity.Category;
 import com.example.backendhoatuoiuit.entity.Product;
-import com.example.backendhoatuoiuit.entity.ProductStatus;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -17,7 +16,7 @@ public class ProductMapper {
         dto.setPrice(product.getPrice());
         dto.setImageUrl(product.getImageUrl());
         dto.setCategoryId(product.getCategory() != null ? product.getCategory().getId() : null);
-        dto.setStatus(product.getStatus().name());
+        dto.setIsActive(product.getIsActive());
         dto.setIsFeatured(product.getIsFeatured());
         return dto;
     }
@@ -34,7 +33,7 @@ public class ProductMapper {
             category.setId(dto.getCategoryId());
             product.setCategory(category);
         }
-        product.setStatus(ProductStatus.valueOf(dto.getStatus()));
+        dto.setIsActive(product.getIsActive());
         product.setIsFeatured(dto.getIsFeatured());
         return product;
     }

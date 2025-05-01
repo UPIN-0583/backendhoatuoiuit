@@ -38,4 +38,9 @@ public class FlowerController {
     public void deleteFlower(@PathVariable Integer id) {
         flowerService.deleteFlower(id);
     }
+
+    @GetMapping("/active")
+    public List<FlowerDTO> getActiveFlowers() {
+        return flowerService.getActiveFlowers();
+    }
 }

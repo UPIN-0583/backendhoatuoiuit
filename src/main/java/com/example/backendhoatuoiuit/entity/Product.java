@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Table(name = "products")
@@ -35,9 +36,8 @@ public class Product {
     @JoinColumn(name = "category_id", referencedColumnName = "id")
     private Category category;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ProductStatus status = ProductStatus.ACTIVE;
+    private Boolean isActive = true;
 
     @Column(name = "is_featured", nullable = false)
     private Boolean isFeatured = false;
@@ -47,6 +47,15 @@ public class Product {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
+
+    @ManyToMany
+    @JoinTable(
+            name = "product_occasion",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "occasion_id")
+    )
+    private Set<Occasion> occasions;
+
 
     @PreUpdate
     public void preUpdate() {

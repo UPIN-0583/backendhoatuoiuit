@@ -1,6 +1,7 @@
 package com.example.backendhoatuoiuit.service;
 
 import com.example.backendhoatuoiuit.dto.FlowerDTO;
+import com.example.backendhoatuoiuit.dto.OccasionDTO;
 import com.example.backendhoatuoiuit.entity.Flower;
 import com.example.backendhoatuoiuit.mapper.FlowerMapper;
 import com.example.backendhoatuoiuit.repository.FlowerRepository;
@@ -48,5 +49,12 @@ public class FlowerService {
 
     public void deleteFlower(Integer id) {
         flowerRepository.deleteById(id);
+    }
+
+    public List<FlowerDTO> getActiveFlowers() {
+        return flowerRepository.findByIsActiveTrue()
+                .stream()
+                .map(flowerMapper::toDTO)
+                .collect(Collectors.toList());
     }
 }

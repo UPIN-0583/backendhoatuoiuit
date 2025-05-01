@@ -49,4 +49,11 @@ public class OccasionService {
     public void deleteOccasion(Integer id) {
         occasionRepository.deleteById(id);
     }
+
+    public List<OccasionDTO> getActiveOccasions() {
+        return occasionRepository.findByIsActiveTrue()
+                .stream()
+                .map(occasionMapper::toDTO)
+                .collect(Collectors.toList());
+    }
 }

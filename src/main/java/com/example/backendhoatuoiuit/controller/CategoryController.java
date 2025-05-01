@@ -38,4 +38,9 @@ public class CategoryController {
     public void deleteCategory(@PathVariable Integer id) {
         categoryService.deleteCategory(id);
     }
+
+    @GetMapping("/active")
+    public List<CategoryDTO> getActiveCategories() {
+        return categoryService.getActiveCategories();
+    }
 }

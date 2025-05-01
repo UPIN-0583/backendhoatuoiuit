@@ -38,4 +38,9 @@ public class OccasionController {
     public void deleteOccasion(@PathVariable Integer id) {
         occasionService.deleteOccasion(id);
     }
+
+    @GetMapping("/active")
+    public List<OccasionDTO> getActiveOccasions() {
+        return occasionService.getActiveOccasions();
+    }
 }
