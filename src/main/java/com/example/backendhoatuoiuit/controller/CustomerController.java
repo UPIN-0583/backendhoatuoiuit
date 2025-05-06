@@ -7,6 +7,7 @@ import com.example.backendhoatuoiuit.dto.SignupRequestDTO;
 import com.example.backendhoatuoiuit.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,11 +16,11 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/customers")
 public class CustomerController {
-
     @Autowired
     private CustomerService customerService;
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public List<CustomerDTO> getAllCustomers() {
         return customerService.getAllCustomers();
     }
@@ -30,8 +31,9 @@ public class CustomerController {
     }
 
     @PostMapping
-    public CustomerDTO createCustomer(@RequestBody CustomerDTO customerDTO, @RequestParam String passwordHash) {
-        return customerService.createCustomer(customerDTO, passwordHash);
+    @PreAuthorize("hasRole('ADMIN')")
+    public CustomerDTO createCustomer(@RequestBody CustomerDTO customerDTO) {
+        return customerService.createCustomer(customerDTO);
     }
 
     @PutMapping("/{id}")
@@ -40,19 +42,21 @@ public class CustomerController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteCustomer(@PathVariable Integer id) {
         customerService.deleteCustomer(id);
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> loginCustomer(@RequestBody LoginRequestDTO loginRequest) {
-        String token = customerService.loginCustomer(loginRequest.getEmail(), loginRequest.getPasswordHash());
-        return ResponseEntity.ok().body(Map.of("token", token));
+        LoginResponseDTO response = customerService.loginCustomer(
+                loginRequest.getEmail(), loginRequest.getPassword()
+        );
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
-        // Client tự xóa token, server chỉ trả thông báo
         return ResponseEntity.ok().body("Đã đăng xuất thành công");
     }
 
@@ -60,6 +64,4 @@ public class CustomerController {
     public CustomerDTO signupCustomer(@RequestBody SignupRequestDTO signupRequest) {
         return customerService.signupCustomer(signupRequest);
     }
-
-
 }

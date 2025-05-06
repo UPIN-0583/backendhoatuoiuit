@@ -79,6 +79,7 @@ CREATE TABLE customers (
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP,
+    role VARCHAR(20) NOT NULL DEFAULT 'USER',
     INDEX idx_email (email),
     INDEX idx_phone (phone),
     INDEX idx_is_active (is_active),

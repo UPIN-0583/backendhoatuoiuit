@@ -17,6 +17,16 @@ public class ReviewMapper {
         dto.setRating(review.getRating());
         dto.setComment(review.getComment());
         dto.setIsVerified(review.getIsVerified());
+        dto.setCreatedAt(review.getCreatedAt());
+
+        if (review.getCustomer() != null) {
+            dto.setCustomerName(review.getCustomer().getName());
+        }
+
+        if (review.getProduct() != null) {
+            dto.setProductName(review.getProduct().getName());
+        }
+
         return dto;
     }
 

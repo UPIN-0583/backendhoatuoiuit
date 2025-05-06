@@ -1,15 +1,18 @@
 package com.example.backendhoatuoiuit.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "flowers")
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
+
 public class Flower {
 
     @Id
@@ -24,4 +27,9 @@ public class Flower {
 
     @Column(nullable = false)
     private Boolean isActive = true;
+
+    public Flower(Integer id) {
+        this.id = id;
+    }
+
 }

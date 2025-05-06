@@ -1,6 +1,7 @@
 package com.example.backendhoatuoiuit.service;
 
 import com.example.backendhoatuoiuit.dto.OrderDTO;
+import com.example.backendhoatuoiuit.dto.OrderItemDTO;
 import com.example.backendhoatuoiuit.entity.*;
 import com.example.backendhoatuoiuit.mapper.OrderMapper;
 import com.example.backendhoatuoiuit.repository.CartRepository;
@@ -77,15 +78,20 @@ public class OrderService {
     }
 
     public void updateTotalAmount(Integer orderId) {
-        BigDecimal total = orderProductRepository.calculateTotalAmountByOrderId(orderId);
-        total = (total != null) ? total : BigDecimal.ZERO;
-
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        BigDecimal total = order.getOrderProducts().stream()
+                .map(op -> {
+                    BigDecimal effectivePrice = op.getPrice().subtract(op.getDiscountApplied() != null ? op.getDiscountApplied() : BigDecimal.ZERO);
+                    return effectivePrice.multiply(BigDecimal.valueOf(op.getQuantity()));
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         order.setTotalAmount(total);
         orderRepository.save(order);
     }
+
 
     public OrderDTO updateOrderStatus(Integer orderId, String newStatus) {
         Order order = orderRepository.findById(orderId)
@@ -117,38 +123,53 @@ public class OrderService {
         customer.setId(customerId);
         newOrder.setCustomer(customer);
         newOrder.setOrderDate(LocalDateTime.now());
-        newOrder.setDeliveryAddress("");// hoặc để sau người dùng nhập
+        newOrder.setDeliveryAddress(""); // hoặc để sau người dùng nhập
         newOrder.setStatus(OrderStatus.PENDING);
-        newOrder.setTotalAmount(BigDecimal.ZERO); // tạm, lát nữa tính
+        newOrder.setTotalAmount(BigDecimal.ZERO);
         newOrder = orderRepository.save(newOrder);
 
         BigDecimal totalAmount = BigDecimal.ZERO;
 
         // Chuyển từng sản phẩm trong cart thành order_product
         for (CartItem cartItem : cart.getItems()) {
+            Product product = cartItem.getProduct();
+            BigDecimal price = product.getPrice();
+            BigDecimal discountPercent = getDiscountPercentForProduct(product); // Ví dụ: 10.00 = 10%
+
+            // Tính tiền giảm theo %
+            BigDecimal discountApplied = price.multiply(discountPercent)
+                    .divide(BigDecimal.valueOf(100), 2, BigDecimal.ROUND_HALF_UP);
+
+            // Tính tiền sau giảm
+            BigDecimal priceAfterDiscount = price.subtract(discountApplied);
+
+            // Tạo OrderProduct
             OrderProduct orderProduct = new OrderProduct();
             orderProduct.setOrder(newOrder);
-            orderProduct.setProduct(cartItem.getProduct());
+            orderProduct.setProduct(product);
             orderProduct.setQuantity(cartItem.getQuantity());
-            orderProduct.setPrice(cartItem.getProduct().getPrice());
-            orderProduct.setDiscountApplied(BigDecimal.ZERO);
+            orderProduct.setPrice(price);
+            orderProduct.setDiscountApplied(discountApplied);
 
             orderProductRepository.save(orderProduct);
 
-            BigDecimal priceAfterDiscount = cartItem.getProduct().getPrice(); // chưa tính discount
-            totalAmount = totalAmount.add(priceAfterDiscount.multiply(BigDecimal.valueOf(cartItem.getQuantity())));
+            // Cộng vào tổng tiền đơn hàng
+            totalAmount = totalAmount.add(
+                    priceAfterDiscount.multiply(BigDecimal.valueOf(cartItem.getQuantity()))
+            );
         }
 
-        // Update tổng tiền đơn
+        // Cập nhật tổng tiền vào đơn hàng
         newOrder.setTotalAmount(totalAmount);
         orderRepository.save(newOrder);
 
-        // Clear cart (xoá hết cart_items)
+        // Xoá giỏ hàng sau khi tạo đơn
         cart.getItems().clear();
         cartRepository.save(cart);
 
         return orderMapper.toDTO(newOrder);
     }
+
 
     public OrderDTO updateDeliveryAddress(Integer orderId, String newAddress) {
         Order order = orderRepository.findById(orderId)
@@ -236,8 +257,33 @@ public class OrderService {
         return orderMapper.toDTO(order);
     }
 
+    public OrderDTO toDTOWithItems(Order order) {
+        OrderDTO dto = orderMapper.toDTO(order);
 
+        List<OrderItemDTO> itemDTOs = order.getOrderProducts().stream().map(op -> {
+            OrderItemDTO item = new OrderItemDTO();
+            item.setProductId(op.getProduct().getId());
+            item.setProductName(op.getProduct().getName());
+            item.setQuantity(op.getQuantity());
+            item.setPrice(op.getPrice());
+            return item;
+        }).collect(Collectors.toList());
 
+        dto.setItems(itemDTOs);
+        return dto;
+    }
 
+    private BigDecimal getDiscountPercentForProduct(Product product) {
+        LocalDateTime now = LocalDateTime.now();
+
+        return product.getProductDiscounts().stream()
+                .map(ProductDiscount::getPromotion)
+                .filter(p -> p.getIsActive()
+                        && !now.isBefore(p.getStartDate())
+                        && !now.isAfter(p.getEndDate()))
+                .map(Promotion::getDiscountValue) // Đây là % (VD: 10.00)
+                .findFirst()
+                .orElse(BigDecimal.ZERO);
+    }
 
 }

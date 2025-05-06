@@ -56,4 +56,21 @@ public class ReviewService {
         return average;
     }
 
+    public List<ReviewDTO> filterReviews(Integer productId, Integer customerId) {
+        List<Review> reviews;
+
+        if (productId != null && customerId != null) {
+            reviews = reviewRepository.findByProductIdAndCustomerId(productId, customerId);
+        } else if (productId != null) {
+            reviews = reviewRepository.findByProductId(productId);
+        } else if (customerId != null) {
+            reviews = reviewRepository.findByCustomerId(customerId);
+        } else {
+            reviews = reviewRepository.findAll();
+        }
+
+        return reviews.stream().map(reviewMapper::toDTO).collect(Collectors.toList());
+    }
+
+
 }

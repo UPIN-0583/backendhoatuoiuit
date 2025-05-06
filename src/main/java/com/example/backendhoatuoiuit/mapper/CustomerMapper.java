@@ -15,6 +15,7 @@ public class CustomerMapper {
         dto.setPhone(customer.getPhone());
         dto.setAddress(customer.getAddress());
         dto.setIsActive(customer.getIsActive());
+        dto.setRole(customer.getRole());
         return dto;
     }
 
@@ -26,6 +27,7 @@ public class CustomerMapper {
         customer.setPhone(dto.getPhone());
         customer.setAddress(dto.getAddress());
         customer.setIsActive(dto.getIsActive());
+        customer.setRole(dto.getRole());
         // Chưa set password ở đây
         return customer;
     }

@@ -1,9 +1,10 @@
 package com.example.backendhoatuoiuit.service;
 
 import com.example.backendhoatuoiuit.dto.ProductDTO;
-import com.example.backendhoatuoiuit.entity.Occasion;
-import com.example.backendhoatuoiuit.entity.Product;
+import com.example.backendhoatuoiuit.entity.*;
 import com.example.backendhoatuoiuit.mapper.ProductMapper;
+import com.example.backendhoatuoiuit.repository.ProductFlowerRepository;
+import com.example.backendhoatuoiuit.repository.ProductOccasionRepository;
 import com.example.backendhoatuoiuit.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -12,6 +13,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import jakarta.persistence.criteria.Predicate;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -28,6 +32,12 @@ public class ProductService {
     @Autowired
     private ProductMapper productMapper;
 
+    @Autowired
+    private ProductFlowerRepository productFlowerRepository;
+
+    @Autowired
+    private ProductOccasionRepository productOccasionRepository;
+
     public List<ProductDTO> getAllProducts() {
         List<Product> products = productRepository.findAll();
         return products.stream().map(productMapper::toDTO).collect(Collectors.toList());
@@ -39,9 +49,32 @@ public class ProductService {
         return productMapper.toDTO(product);
     }
 
-    public ProductDTO createProduct(ProductDTO productDTO) {
-        Product product = productMapper.toEntity(productDTO);
+    public ProductDTO createProduct(ProductDTO dto) {
+        Product product = productMapper.toEntity(dto);
         product = productRepository.save(product);
+
+        // 🌸 Gắn Flower cho Product
+        if (dto.getFlowerIds() != null) {
+            for (Integer flowerId : dto.getFlowerIds()) {
+                ProductFlower pf = new ProductFlower();
+                pf.setId(new ProductFlowerKey(product.getId(), flowerId));
+                pf.setProduct(product);
+                pf.setFlower(new Flower(flowerId));
+                productFlowerRepository.save(pf);
+            }
+        }
+
+        // 🎁 Gắn Occasion cho Product
+        if (dto.getOccasionIds() != null) {
+            for (Integer occasionId : dto.getOccasionIds()) {
+                ProductOccasion po = new ProductOccasion();
+                po.setId(new ProductOccasionKey(product.getId(), occasionId));
+                po.setProduct(product);
+                po.setOccasion(new Occasion(occasionId));
+                productOccasionRepository.save(po);
+            }
+        }
+
         return productMapper.toDTO(product);
     }
 
@@ -156,6 +189,49 @@ public class ProductService {
                 .toList();
     }
 
+    public ProductDTO toggleProductActive(Integer id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+        product.setIsActive(!product.getIsActive());
+        product = productRepository.save(product);
+        return productMapper.toDTO(product);
+    }
+
+    @Transactional
+    public void assignOccasions(@PathVariable Integer id, @RequestBody List<Integer> occasionIds) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        // Xóa các occasion cũ
+        productOccasionRepository.deleteByProductId(id);
+
+        // Gán mới
+        for (Integer occasionId : occasionIds) {
+            ProductOccasion po = new ProductOccasion();
+            po.setId(new ProductOccasionKey(id, occasionId));
+            po.setProduct(product);
+            po.setOccasion(new Occasion(occasionId));
+            productOccasionRepository.save(po);
+        }
+    }
+
+    @Transactional
+    public void assignFlowers(@PathVariable Integer id, @RequestBody List<Integer> flowerIds) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        // Xóa các flower cũ
+        productFlowerRepository.deleteByProductId(id);
+
+        // Gán mới
+        for (Integer flowerId : flowerIds) {
+            ProductFlower pf = new ProductFlower();
+            pf.setId(new ProductFlowerKey(id, flowerId));
+            pf.setProduct(product);
+            pf.setFlower(new Flower(flowerId));
+            productFlowerRepository.save(pf);
+        }
+    }
 
 
 }

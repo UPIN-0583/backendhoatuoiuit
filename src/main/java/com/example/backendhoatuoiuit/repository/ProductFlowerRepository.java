@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface ProductFlowerRepository extends JpaRepository<ProductFlower, ProductFlowerKey> {
     List<ProductFlower> findByProductId(Integer productId);
+    void deleteByProductId(Integer productId);
 }

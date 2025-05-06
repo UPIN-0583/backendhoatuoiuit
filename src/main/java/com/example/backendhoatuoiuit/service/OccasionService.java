@@ -42,6 +42,7 @@ public class OccasionService {
         occasion.setName(occasionDTO.getName());
         occasion.setDescription(occasionDTO.getDescription());
         occasion.setIsActive(occasionDTO.getIsActive());
+        occasion.setImageUrl(occasionDTO.getImageUrl());
         occasion = occasionRepository.save(occasion);
         return occasionMapper.toDTO(occasion);
     }

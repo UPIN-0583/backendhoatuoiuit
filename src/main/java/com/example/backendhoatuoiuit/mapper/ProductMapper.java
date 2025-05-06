@@ -2,8 +2,12 @@ package com.example.backendhoatuoiuit.mapper;
 
 import com.example.backendhoatuoiuit.dto.ProductDTO;
 import com.example.backendhoatuoiuit.entity.Category;
+import com.example.backendhoatuoiuit.entity.Flower;
+import com.example.backendhoatuoiuit.entity.Occasion;
 import com.example.backendhoatuoiuit.entity.Product;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class ProductMapper {
@@ -15,11 +19,36 @@ public class ProductMapper {
         dto.setDescription(product.getDescription());
         dto.setPrice(product.getPrice());
         dto.setImageUrl(product.getImageUrl());
-        dto.setCategoryId(product.getCategory() != null ? product.getCategory().getId() : null);
         dto.setIsActive(product.getIsActive());
         dto.setIsFeatured(product.getIsFeatured());
+        dto.setCategoryId(product.getCategory() != null ? product.getCategory().getId() : null);
+
+        dto.setOccasionIds(
+                product.getOccasions() != null
+                        ? product.getOccasions().stream().map(Occasion::getId).toList()
+                        : List.of()
+        );
+        dto.setFlowerIds(
+                product.getFlowers() != null
+                        ? product.getFlowers().stream().map(Flower::getId).toList()
+                        : List.of()
+        );
+
+        dto.setOccasionNames(
+                product.getOccasions() != null
+                        ? product.getOccasions().stream().map(Occasion::getName).toList()
+                        : List.of()
+        );
+        dto.setFlowerNames(
+                product.getFlowers() != null
+                        ? product.getFlowers().stream().map(Flower::getName).toList()
+                        : List.of()
+        );
+
         return dto;
     }
+
+
 
     public Product toEntity(ProductDTO dto) {
         Product product = new Product();

@@ -42,6 +42,9 @@ public class Customer {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
 
+    @Column(name = "role")
+    private String role;
+
     @PreUpdate
     public void preUpdate() {
         updatedAt = LocalDateTime.now();

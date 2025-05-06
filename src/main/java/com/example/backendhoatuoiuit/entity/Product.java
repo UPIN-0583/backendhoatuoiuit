@@ -7,6 +7,8 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -54,7 +56,22 @@ public class Product {
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "occasion_id")
     )
-    private Set<Occasion> occasions;
+    private Set<Occasion> occasions = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "product_flower",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "flower_id")
+    )
+    private Set<Flower> flowers = new HashSet<>();
+
+    public Product(Integer id) {
+        this.id = id;
+    }
+
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    private List<ProductDiscount> productDiscounts;
 
 
     @PreUpdate

@@ -3,6 +3,7 @@ package com.example.backendhoatuoiuit.controller;
 import com.example.backendhoatuoiuit.dto.OrderProductDTO;
 import com.example.backendhoatuoiuit.service.OrderProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -11,7 +12,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/order-products")
 public class OrderProductController {
-
     @Autowired
     private OrderProductService orderProductService;
 
@@ -21,11 +21,13 @@ public class OrderProductController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('USER')")
     public OrderProductDTO addOrderProduct(@RequestBody OrderProductDTO dto) {
         return orderProductService.addOrderProduct(dto);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('USER')")
     public void deleteOrderProduct(@PathVariable Integer id) {
         orderProductService.deleteOrderProduct(id);
     }
@@ -34,5 +36,4 @@ public class OrderProductController {
     public BigDecimal calculateTotalAmount(@PathVariable Integer orderId) {
         return orderProductService.calculateTotalAmountByOrderId(orderId);
     }
-
 }

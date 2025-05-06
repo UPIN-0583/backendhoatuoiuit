@@ -3,6 +3,7 @@ package com.example.backendhoatuoiuit.dto;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 public class ProductDTO {
@@ -14,4 +15,10 @@ public class ProductDTO {
     private Integer categoryId;
     private Boolean isActive;
     private Boolean isFeatured;
+
+    private List<Integer> flowerIds;
+    private List<Integer> occasionIds;
+    private List<String> occasionNames;
+    private List<String> flowerNames;
+
 }

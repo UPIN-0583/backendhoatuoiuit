@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface ProductDiscountRepository extends JpaRepository<ProductDiscount, ProductDiscountKey> {
     List<ProductDiscount> findByProductId(Integer productId);
+    void deleteByPromotionId(Integer promotionId);
 }

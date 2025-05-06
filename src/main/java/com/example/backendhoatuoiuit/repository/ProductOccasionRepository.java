@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface ProductOccasionRepository extends JpaRepository<ProductOccasion, ProductOccasionKey> {
     List<ProductOccasion> findByProductId(Integer productId);
+    void deleteByProductId(Integer productId);
 }

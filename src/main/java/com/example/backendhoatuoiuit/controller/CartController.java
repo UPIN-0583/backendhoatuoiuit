@@ -5,14 +5,15 @@ import com.example.backendhoatuoiuit.dto.CartItemDTO;
 import com.example.backendhoatuoiuit.service.CartService;
 import com.example.backendhoatuoiuit.service.CartItemService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/api/carts")
+@PreAuthorize("hasRole('USER')") // Tất cả thao tác giỏ hàng đều là của người dùng
 public class CartController {
-
     @Autowired
     private CartService cartService;
 
