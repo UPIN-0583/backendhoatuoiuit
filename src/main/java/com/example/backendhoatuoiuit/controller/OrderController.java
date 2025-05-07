@@ -2,6 +2,7 @@ package com.example.backendhoatuoiuit.controller;
 
 import com.example.backendhoatuoiuit.dto.OrderDTO;
 import com.example.backendhoatuoiuit.entity.Order;
+import com.example.backendhoatuoiuit.mapper.OrderMapper;
 import com.example.backendhoatuoiuit.repository.OrderRepository;
 import com.example.backendhoatuoiuit.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,14 +13,21 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
     @Autowired
     private OrderService orderService;
+
     @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    private OrderMapper orderMapper;
+
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -115,4 +123,61 @@ public class OrderController {
         Order order = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
         return orderService.toDTOWithItems(order);
     }
+
+    @GetMapping("/count/today")
+    @PreAuthorize("hasRole('ADMIN')")
+    public long countOrdersToday() {
+        LocalDate today = LocalDate.now();
+        return orderService.countOrdersByDate(today);
+    }
+
+    @GetMapping("/status-count")
+    @PreAuthorize("hasRole('ADMIN')")
+    public Map<String, Long> getOrderCountByStatus() {
+        return orderService.countOrdersByStatus();
+    }
+
+    @GetMapping("/recent")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<OrderDTO> getRecentOrders(@RequestParam(defaultValue = "5") int limit) {
+        return orderService.getRecentOrders(limit)
+                .stream()
+                .map(orderMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("/revenue/daily")
+    @PreAuthorize("hasRole('ADMIN')")
+    public Map<String, BigDecimal> getDailyRevenue(
+            @RequestParam int month,
+            @RequestParam int year) {
+        return orderService.getDailyRevenue(month, year);
+    }
+
+    @GetMapping("/count/daily")
+    @PreAuthorize("hasRole('ADMIN')")
+    public Map<String, Long> getDailyOrderCount(
+            @RequestParam int month,
+            @RequestParam int year) {
+        return orderService.getDailyOrderCount(month, year);
+    }
+
+    @GetMapping("/revenue/range")
+    @PreAuthorize("hasRole('ADMIN')")
+    public Map<String, BigDecimal> getRevenueInRange(
+            @RequestParam String start,
+            @RequestParam String end) {
+        return orderService.getRevenueInRange(LocalDate.parse(start), LocalDate.parse(end));
+    }
+
+    @GetMapping("/count/range")
+    @PreAuthorize("hasRole('ADMIN')")
+    public Map<String, Long> getOrderCountInRange(
+            @RequestParam String start,
+            @RequestParam String end) {
+        return orderService.getOrderCountInRange(LocalDate.parse(start), LocalDate.parse(end));
+    }
+
+
+
 }

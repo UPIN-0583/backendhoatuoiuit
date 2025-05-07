@@ -8,6 +8,7 @@ import com.example.backendhoatuoiuit.repository.CartRepository;
 import com.example.backendhoatuoiuit.repository.OrderProductRepository;
 import com.example.backendhoatuoiuit.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +16,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -285,5 +288,96 @@ public class OrderService {
                 .findFirst()
                 .orElse(BigDecimal.ZERO);
     }
+
+    public long countOrdersByDate(LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();                  // 00:00
+        LocalDateTime endOfDay = date.plusDays(1).atStartOfDay();        // ngày mai 00:00
+        return orderRepository.countByOrderDateBetween(startOfDay, endOfDay);
+    }
+
+
+    public Map<String, Long> countOrdersByStatus() {
+        List<Object[]> results = orderRepository.countGroupByStatus();
+        return results.stream().collect(Collectors.toMap(
+                r -> r[0].toString(),
+                r -> (Long) r[1]
+        ));
+    }
+
+
+    public List<Order> getRecentOrders(int limit) {
+        return orderRepository.findTopByOrderByCreatedAtDesc(PageRequest.of(0, limit));
+    }
+
+    public Map<String, BigDecimal> getDailyRevenue(int month, int year) {
+        LocalDate start = LocalDate.of(year, month, 1);
+        LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
+
+        List<Order> orders = orderRepository.findByOrderDateBetween(
+                start.atStartOfDay(),
+                end.plusDays(1).atStartOfDay()
+        );
+
+        // Group doanh thu theo ngày
+        Map<String, BigDecimal> revenuePerDay = new TreeMap<>();
+        for (Order order : orders) {
+            String dateStr = order.getOrderDate().toLocalDate().toString();
+            BigDecimal amount = order.getTotalAmount() != null ? order.getTotalAmount() : BigDecimal.ZERO;
+
+            revenuePerDay.put(dateStr, revenuePerDay.getOrDefault(dateStr, BigDecimal.ZERO).add(amount));
+        }
+
+        return revenuePerDay;
+    }
+
+    public Map<String, Long> getDailyOrderCount(int month, int year) {
+        LocalDate start = LocalDate.of(year, month, 1);
+        LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
+
+        List<Order> orders = orderRepository.findByOrderDateBetween(
+                start.atStartOfDay(),
+                end.plusDays(1).atStartOfDay()
+        );
+
+        Map<String, Long> countPerDay = new TreeMap<>();
+        for (Order order : orders) {
+            String dateStr = order.getOrderDate().toLocalDate().toString();
+            countPerDay.put(dateStr, countPerDay.getOrDefault(dateStr, 0L) + 1);
+        }
+
+        return countPerDay;
+    }
+
+    public Map<String, BigDecimal> getRevenueInRange(LocalDate startDate, LocalDate endDate) {
+        List<Order> orders = orderRepository.findByOrderDateBetween(
+                startDate.atStartOfDay(),
+                endDate.plusDays(1).atStartOfDay()
+        );
+
+        Map<String, BigDecimal> revenuePerDay = new TreeMap<>();
+        for (Order order : orders) {
+            String dateStr = order.getOrderDate().toLocalDate().toString();
+            BigDecimal amount = order.getTotalAmount() != null ? order.getTotalAmount() : BigDecimal.ZERO;
+            revenuePerDay.put(dateStr, revenuePerDay.getOrDefault(dateStr, BigDecimal.ZERO).add(amount));
+        }
+
+        return revenuePerDay;
+    }
+
+    public Map<String, Long> getOrderCountInRange(LocalDate startDate, LocalDate endDate) {
+        List<Order> orders = orderRepository.findByOrderDateBetween(
+                startDate.atStartOfDay(),
+                endDate.plusDays(1).atStartOfDay()
+        );
+
+        Map<String, Long> countPerDay = new TreeMap<>();
+        for (Order order : orders) {
+            String dateStr = order.getOrderDate().toLocalDate().toString();
+            countPerDay.put(dateStr, countPerDay.getOrDefault(dateStr, 0L) + 1);
+        }
+
+        return countPerDay;
+    }
+
 
 }
