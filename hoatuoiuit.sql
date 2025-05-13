@@ -228,6 +228,20 @@ CREATE TABLE cart_items (
                             INDEX idx_product_id (product_id)
 );
 
+-- Tạo bảng wishlist
+CREATE TABLE wishlist (
+                          id INT PRIMARY KEY AUTO_INCREMENT,
+                          customer_id INT NOT NULL,
+                          product_id INT NOT NULL,
+                          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                          FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
+                          FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+                          UNIQUE KEY unique_wishlist_item (customer_id, product_id),
+                          INDEX idx_customer_id (customer_id),
+                          INDEX idx_product_id (product_id)
+);
+
+
 
 INSERT INTO flowers (name, description, is_active) VALUES
                                                        ('Hoa hồng', 'Hoa hồng đỏ tượng trưng cho tình yêu và sự lãng mạn.', TRUE),

@@ -3,6 +3,7 @@ package com.example.backendhoatuoiuit.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -23,17 +24,34 @@ public class SecurityConfig {
         http
                 .cors().and().csrf().disable()
                 .authorizeHttpRequests()
-                // ✅ Cho phép login, signup, truy xuất ảnh
+                // ✅ Public: login, signup, ảnh
                 .requestMatchers("/api/customers/login", "/api/customers/signup", "/uploads/**").permitAll()
+                .requestMatchers(HttpMethod.GET,
+                        "/api/categories/**",
+                        "/api/flowers/**",
+                        "/api/occasions/**",
+                        "/api/products/**",
+                        "/api/promotions/**",
+                        "/api/reviews/**",
+                        "/api/order-products/order/**",
+                        "/api/order-products/order/*/total-amount",
+                        "/api/payments/**",
+                        "/api/product-discount/product/**",
+                        "/api/product-flower/product/**",
+                        "/api/product-occasion/product/**",
+                        "/api/orders/*",
+                        "/api/orders/orders/*"
+                ).permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
-        // ✅ Thêm filter để kiểm tra JWT trước UsernamePasswordAuthenticationFilter
+        // ✅ Kiểm tra JWT
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
