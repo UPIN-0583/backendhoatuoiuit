@@ -10,6 +10,8 @@ FROM eclipse-temurin:21-jdk-alpine
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
+# Cho Render biết container mở port nào (Render sẽ connect vào)
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-Dserver.port=$PORT", "-jar", "/app/app.jar"]
+# ✅ Dùng shell form để biến môi trường $PORT được gán
+ENTRYPOINT java -Dserver.port=$PORT -jar /app/app.jar
