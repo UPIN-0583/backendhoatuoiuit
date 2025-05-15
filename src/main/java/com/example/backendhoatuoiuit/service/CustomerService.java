@@ -118,7 +118,7 @@ public class CustomerService {
 
         // 1. Tìm khách hàng
         Customer customer = customerRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException("Thông tin đăng nhập không đúng", 400));
+                .orElseThrow(() -> new CustomException("Thông tin đăng nhập không đúng", 200 ));
 
         // 2. Kiểm tra trạng thái hoạt động
         if (!customer.getIsActive()) {
@@ -127,7 +127,7 @@ public class CustomerService {
 
         // 3. Kiểm tra mật khẩu
         if (!passwordEncoder.matches(rawPassword, customer.getPasswordHash())) {
-            throw new CustomException("Thông tin đăng nhập không đúng", 400);
+            throw new CustomException("Thông tin đăng nhập không đúng", 200);
         }
 
         // 4. Tạo JWT token
