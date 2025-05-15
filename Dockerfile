@@ -1,11 +1,12 @@
-# Dùng Java 17 nhẹ từ Eclipse Temurin
-FROM eclipse-temurin:17-jdk-alpine
-
-# Tạo thư mục làm việc
+# Giai đoạn 1: Build ứng dụng
+FROM maven:3.9.6-eclipse-temurin-17-alpine AS build
 WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package -DskipTests
 
-# Copy file JAR vào container
-COPY target/backendhoatuoiuit-0.0.1-SNAPSHOT.jar app.jar
-
-# Mặc định chạy ứng dụng
+# Giai đoạn 2: Chạy ứng dụng
+FROM eclipse-temurin:17-jdk-alpine
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
