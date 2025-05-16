@@ -22,6 +22,7 @@ public class ProductMapper {
         dto.setIsActive(product.getIsActive());
         dto.setIsFeatured(product.getIsFeatured());
         dto.setCategoryId(product.getCategory() != null ? product.getCategory().getId() : null);
+        dto.setCategoryName(product.getCategory() != null ? product.getCategory().getName() : null);
 
         dto.setOccasionIds(
                 product.getOccasions() != null
