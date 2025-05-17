@@ -30,10 +30,23 @@ public class CartController {
         return cartItemService.addItemToCart(cartItemDTO);
     }
 
+    @GetMapping("/{customerId}/count")
+    public Integer getCartItemCount(@PathVariable Integer customerId) {
+        return cartItemService.getCartItemCountByCustomerId(customerId);
+    }
+
+
     @DeleteMapping("/items/{itemId}")
     public void removeItem(@PathVariable Integer itemId) {
         cartItemService.removeItemFromCart(itemId);
     }
+
+    @DeleteMapping("/items")
+    public void removeItem(@RequestParam Integer cartId,
+                           @RequestParam Integer productId) {
+        cartItemService.removeItemByCartIdAndProductId(cartId, productId);
+    }
+
 
     @PutMapping("/items/{itemId}/quantity")
     public CartItemDTO updateItemQuantity(@PathVariable Integer itemId, @RequestParam("quantity") Integer quantity) {

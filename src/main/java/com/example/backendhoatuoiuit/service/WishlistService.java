@@ -8,6 +8,8 @@ import com.example.backendhoatuoiuit.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class WishlistService {
 
@@ -58,4 +60,21 @@ public class WishlistService {
     public void removeItemFromWishlist(Integer itemId) {
         wishlistItemRepository.deleteById(itemId);
     }
+
+    public boolean isProductInWishlist(Integer customerId, Integer productId) {
+        return wishlistItemRepository.existsByCustomerIdAndProductId(customerId, productId);
+    }
+
+    public List<Integer> getAllProductIdsInWishlist(Integer customerId) {
+        return wishlistItemRepository.findAllProductIdsInWishlist(customerId);
+    }
+
+    public void removeItemByCustomerIdAndProductId(Integer customerId, Integer productId) {
+        WishlistItem item = wishlistItemRepository
+                .findByCustomerIdAndProductId(customerId, productId)
+                .orElseThrow(() -> new RuntimeException("Wishlist item not found"));
+        wishlistItemRepository.delete(item);
+    }
+
+
 }

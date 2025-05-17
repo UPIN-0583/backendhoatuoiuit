@@ -1,6 +1,7 @@
 package com.example.backendhoatuoiuit.service;
 
 import com.example.backendhoatuoiuit.dto.ProductDTO;
+import com.example.backendhoatuoiuit.dto.PromotionDTO;
 import com.example.backendhoatuoiuit.entity.*;
 import com.example.backendhoatuoiuit.mapper.ProductMapper;
 import com.example.backendhoatuoiuit.repository.ProductFlowerRepository;

@@ -1,7 +1,13 @@
 package com.example.backendhoatuoiuit.controller;
 
 import com.example.backendhoatuoiuit.dto.ProductDTO;
+import com.example.backendhoatuoiuit.dto.ProductViewDTO;
+import com.example.backendhoatuoiuit.dto.PromotionDTO;
+import com.example.backendhoatuoiuit.mapper.ProductViewMapper;
+import com.example.backendhoatuoiuit.service.CategoryService;
 import com.example.backendhoatuoiuit.service.ProductService;
+import com.example.backendhoatuoiuit.service.PromotionService;
+import com.example.backendhoatuoiuit.service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +22,14 @@ import java.util.List;
 public class ProductController {
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private PromotionService promotionService;
+
+    @Autowired
+    private ReviewService reviewService;
+    @Autowired
+    private ProductViewMapper productViewMapper;
 
     @GetMapping("/featured")
     public List<ProductDTO> getFeaturedProducts() {
@@ -108,4 +122,14 @@ public class ProductController {
         productService.assignFlowers(id, flowerIds);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/{id}/detail")
+    public ProductViewDTO getProductDetail(@PathVariable Integer id) {
+        ProductDTO product = productService.getProductById(id);
+        PromotionDTO promotion = promotionService.getActivePromotionForProduct(id);
+        Double rating = reviewService.getAverageRatingByProductId(id);
+
+        return productViewMapper.toProductViewDTO(product, promotion, rating);
+    }
+
 }

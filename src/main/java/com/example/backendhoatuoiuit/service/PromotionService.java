@@ -91,4 +91,12 @@ public class PromotionService {
             productDiscountRepository.save(pd);
         }
     }
+
+
+    public PromotionDTO getActivePromotionForProduct(Integer productId) {
+        List<Promotion> promotions = promotionRepository.findActivePromotionsByProductId(productId);
+        if (promotions.isEmpty()) return null;
+
+        return promotionMapper.toDTO(promotions.get(0)); // lấy khuyến mãi đầu tiên nếu có
+    }
 }
