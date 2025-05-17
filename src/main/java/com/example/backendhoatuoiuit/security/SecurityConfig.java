@@ -39,7 +39,7 @@ public class SecurityConfig {
                         "/api/product-discount/product/**",
                         "/api/product-flower/product/**",
                         "/api/product-occasion/product/**",
-                        "/api/orders/*",
+                        "/api/orders/**",
                         "/api/orders/orders/*",
                         "/api/blog/**",
                         "/api/customers/**"
