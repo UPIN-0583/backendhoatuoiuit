@@ -10,7 +10,10 @@ import java.math.BigDecimal;
 @Component
 public class ProductViewMapper {
 
-    public ProductViewDTO toProductViewDTO(ProductDTO product, PromotionDTO promotion, Double averageRating) {
+    public ProductViewDTO toProductViewDTO(ProductDTO product,
+                                           PromotionDTO promotion,
+                                           Double averageRating,
+                                           boolean isFavorited) {
         if (product == null) return null;
 
         BigDecimal discountValue = (promotion != null && promotion.getDiscountValue() != null)
@@ -31,6 +34,7 @@ public class ProductViewMapper {
         dto.setCategoryName(product.getCategoryName());
         dto.setFlowerNames(product.getFlowerNames());
         dto.setOccasionNames(product.getOccasionNames());
+        dto.setIsFavorited(isFavorited); // ✅ gán giá trị yêu thích
         return dto;
     }
 }

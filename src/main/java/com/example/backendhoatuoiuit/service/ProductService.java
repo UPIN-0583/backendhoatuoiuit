@@ -234,5 +234,10 @@ public class ProductService {
         }
     }
 
+    public List<ProductDTO> getAllActiveProducts() {
+        List<Product> products = productRepository.findByIsActiveTrue();
+        return products.stream().map(productMapper::toDTO).collect(Collectors.toList());
+    }
+
 
 }

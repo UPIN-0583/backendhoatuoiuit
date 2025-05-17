@@ -22,4 +22,5 @@ public class ProductViewDTO {
 
     private List<String> flowerNames;
     private List<String> occasionNames;
+    private Boolean isFavorited;
 }

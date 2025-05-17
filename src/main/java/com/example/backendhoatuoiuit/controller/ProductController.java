@@ -4,10 +4,7 @@ import com.example.backendhoatuoiuit.dto.ProductDTO;
 import com.example.backendhoatuoiuit.dto.ProductViewDTO;
 import com.example.backendhoatuoiuit.dto.PromotionDTO;
 import com.example.backendhoatuoiuit.mapper.ProductViewMapper;
-import com.example.backendhoatuoiuit.service.CategoryService;
-import com.example.backendhoatuoiuit.service.ProductService;
-import com.example.backendhoatuoiuit.service.PromotionService;
-import com.example.backendhoatuoiuit.service.ReviewService;
+import com.example.backendhoatuoiuit.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +12,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/products")
@@ -27,9 +28,13 @@ public class ProductController {
     private PromotionService promotionService;
 
     @Autowired
+
     private ReviewService reviewService;
     @Autowired
     private ProductViewMapper productViewMapper;
+
+    @Autowired
+    private WishlistService wishlistService;
 
     @GetMapping("/featured")
     public List<ProductDTO> getFeaturedProducts() {
@@ -124,12 +129,32 @@ public class ProductController {
     }
 
     @GetMapping("/{id}/detail")
-    public ProductViewDTO getProductDetail(@PathVariable Integer id) {
+    public ProductViewDTO getProductDetail(@PathVariable Integer id, @RequestParam Integer customerId) {
         ProductDTO product = productService.getProductById(id);
         PromotionDTO promotion = promotionService.getActivePromotionForProduct(id);
         Double rating = reviewService.getAverageRatingByProductId(id);
+        boolean isFavorited = wishlistService.isProductInWishlist(customerId, id);
 
-        return productViewMapper.toProductViewDTO(product, promotion, rating);
+        return productViewMapper.toProductViewDTO(product, promotion, rating, isFavorited);
     }
+
+    @GetMapping("/view-all")
+    public List<ProductViewDTO> getAllProductViews(@RequestParam(required = false) Integer customerId) {
+        List<ProductDTO> products = productService.getAllActiveProducts();
+
+        // Nếu chưa đăng nhập, trả về danh sách rỗng
+        Set<Integer> favoritedProductIds = (customerId != null)
+                ? new HashSet<>(wishlistService.getAllProductIdsInWishlist(customerId))
+                : Collections.emptySet();
+
+        return products.stream().map(product -> {
+            PromotionDTO promo = promotionService.getActivePromotionForProduct(product.getId());
+            Double rating = reviewService.getAverageRatingByProductId(product.getId());
+            boolean isFavorited = favoritedProductIds.contains(product.getId());
+
+            return productViewMapper.toProductViewDTO(product, promo, rating, isFavorited);
+        }).collect(Collectors.toList());
+    }
+
 
 }
