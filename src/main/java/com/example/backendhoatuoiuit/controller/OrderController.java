@@ -40,6 +40,12 @@ public class OrderController {
         return orderService.getOrderById(id);
     }
 
+    @GetMapping("customer/{id}")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public List<OrderDTO> getCustomerOrderById(@PathVariable Integer id) {
+        return orderService.getOrdersByCustomerId(id);
+    }
+
     @PostMapping
     public OrderDTO createOrder(@RequestBody OrderDTO orderDTO) {
         return orderService.createOrder(orderDTO);

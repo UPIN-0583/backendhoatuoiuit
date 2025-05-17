@@ -33,5 +33,8 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 
     long countByOrderDateBetween(LocalDateTime start, LocalDateTime end);
 
+    List<Order> findByCustomerId(Integer customerId);
+
+
 
 }
