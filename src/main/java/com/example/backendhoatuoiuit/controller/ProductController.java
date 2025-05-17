@@ -129,14 +129,18 @@ public class ProductController {
     }
 
     @GetMapping("/{id}/detail")
-    public ProductViewDTO getProductDetail(@PathVariable Integer id, @RequestParam Integer customerId) {
+    public ProductViewDTO getProductDetail(@PathVariable Integer id,
+                                           @RequestParam(required = false) Integer customerId) {
         ProductDTO product = productService.getProductById(id);
         PromotionDTO promotion = promotionService.getActivePromotionForProduct(id);
         Double rating = reviewService.getAverageRatingByProductId(id);
-        boolean isFavorited = wishlistService.isProductInWishlist(customerId, id);
+
+        boolean isFavorited = (customerId != null)
+                && wishlistService.isProductInWishlist(customerId, id);
 
         return productViewMapper.toProductViewDTO(product, promotion, rating, isFavorited);
     }
+
 
     @GetMapping("/view-all")
     public List<ProductViewDTO> getAllProductViews(@RequestParam(required = false) Integer customerId) {
