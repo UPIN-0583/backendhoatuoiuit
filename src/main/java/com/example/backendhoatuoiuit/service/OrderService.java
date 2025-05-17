@@ -379,5 +379,10 @@ public class OrderService {
         return countPerDay;
     }
 
+    public List<OrderDTO> getOrdersByCustomerId(Integer customerId) {
+        List<Order> orders = orderRepository.findByCustomerId(customerId);
+        return orders.stream().map(orderMapper::toDTO).collect(Collectors.toList());
+    }
+
 
 }
