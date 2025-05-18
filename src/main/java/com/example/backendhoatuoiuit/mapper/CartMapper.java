@@ -30,6 +30,10 @@ public class CartMapper {
         dto.setCartId(item.getCart() != null ? item.getCart().getId() : null);
         dto.setProductId(item.getProduct() != null ? item.getProduct().getId() : null);
         dto.setQuantity(item.getQuantity());
+        dto.setProductName(item.getProduct().getName());
+        dto.setImageUrl(item.getProduct().getImageUrl());
+        dto.setPrice(item.getProduct().getPrice().doubleValue());
+        dto.setAddedDate(item.getAddedDate());
         return dto;
     }
 }

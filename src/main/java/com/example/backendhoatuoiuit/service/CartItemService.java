@@ -22,6 +22,10 @@ public class CartItemService {
     @Autowired
     private CartRepository cartRepository;
 
+    @Autowired
+    private CartMapper cartMapper;
+
+
     public CartItemDTO addItemToCart(CartItemDTO dto) {
         Cart cart = cartRepository.findById(dto.getCartId())
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
@@ -47,8 +51,7 @@ public class CartItemService {
 
         item = cartItemRepository.save(item);
 
-        CartMapper mapper = new CartMapper();
-        return mapper.toItemDTO(item);
+        return cartMapper.toItemDTO(item);
     }
 
     public Integer getCartItemCountByCustomerId(Integer customerId) {
@@ -81,8 +84,7 @@ public class CartItemService {
         item.setQuantity(newQuantity);
         item = cartItemRepository.save(item);
 
-        CartMapper mapper = new CartMapper();
-        return mapper.toItemDTO(item);
+        return cartMapper.toItemDTO(item);
     }
 
     public BigDecimal calculateCartTotal(Integer cartId) {
@@ -91,7 +93,9 @@ public class CartItemService {
 
         return cart.getItems().stream()
                 .map(item -> {
-                    BigDecimal price = item.getProduct().getPrice();
+                    Product product = item.getProduct();
+                    if (product == null) return BigDecimal.ZERO; // tránh null
+                    BigDecimal price = product.getPrice();
                     return price.multiply(BigDecimal.valueOf(item.getQuantity()));
                 })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
