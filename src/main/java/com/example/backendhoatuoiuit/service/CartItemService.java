@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 @Service
 public class CartItemService {
@@ -21,24 +22,52 @@ public class CartItemService {
     @Autowired
     private CartRepository cartRepository;
 
+    @Autowired
+    private CartMapper cartMapper;
+
+
     public CartItemDTO addItemToCart(CartItemDTO dto) {
         Cart cart = cartRepository.findById(dto.getCartId())
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
 
-        CartItem item = new CartItem();
-        item.setCart(cart);
+        // Kiểm tra item đã tồn tại chưa (cùng cartId & productId)
+        Optional<CartItem> existingItemOpt = cartItemRepository
+                .findByCartIdAndProductId(dto.getCartId(), dto.getProductId());
 
-        Product product = new Product();
-        product.setId(dto.getProductId());
-        item.setProduct(product);
-
-        item.setQuantity(dto.getQuantity());
+        CartItem item;
+        if (existingItemOpt.isPresent()) {
+            // Nếu đã tồn tại, tăng số lượng
+            item = existingItemOpt.get();
+            item.setQuantity(item.getQuantity() + dto.getQuantity());
+        } else {
+            // Nếu chưa, tạo mới
+            item = new CartItem();
+            item.setCart(cart);
+            Product product = new Product();
+            product.setId(dto.getProductId());
+            item.setProduct(product);
+            item.setQuantity(dto.getQuantity());
+        }
 
         item = cartItemRepository.save(item);
 
-        CartMapper mapper = new CartMapper();
-        return mapper.toItemDTO(item);
+        return cartMapper.toItemDTO(item);
     }
+
+    public Integer getCartItemCountByCustomerId(Integer customerId) {
+
+        Cart cart = cartRepository.findByCustomerId(customerId)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+
+        return cartItemRepository.sumQuantityByCartId(cart.getId()).orElse(0);
+    }
+
+    public void removeItemByCartIdAndProductId(Integer cartId, Integer productId) {
+        CartItem item = cartItemRepository.findByCartIdAndProductId(cartId, productId)
+                .orElseThrow(() -> new RuntimeException("Cart item not found"));
+        cartItemRepository.delete(item);
+    }
+
 
     public void removeItemFromCart(Integer itemId) {
         cartItemRepository.deleteById(itemId);
@@ -55,8 +84,7 @@ public class CartItemService {
         item.setQuantity(newQuantity);
         item = cartItemRepository.save(item);
 
-        CartMapper mapper = new CartMapper();
-        return mapper.toItemDTO(item);
+        return cartMapper.toItemDTO(item);
     }
 
     public BigDecimal calculateCartTotal(Integer cartId) {
@@ -65,7 +93,9 @@ public class CartItemService {
 
         return cart.getItems().stream()
                 .map(item -> {
-                    BigDecimal price = item.getProduct().getPrice();
+                    Product product = item.getProduct();
+                    if (product == null) return BigDecimal.ZERO; // tránh null
+                    BigDecimal price = product.getPrice();
                     return price.multiply(BigDecimal.valueOf(item.getQuantity()));
                 })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);

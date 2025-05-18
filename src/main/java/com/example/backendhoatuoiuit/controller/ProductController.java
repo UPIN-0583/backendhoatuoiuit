@@ -1,7 +1,10 @@
 package com.example.backendhoatuoiuit.controller;
 
 import com.example.backendhoatuoiuit.dto.ProductDTO;
-import com.example.backendhoatuoiuit.service.ProductService;
+import com.example.backendhoatuoiuit.dto.ProductViewDTO;
+import com.example.backendhoatuoiuit.dto.PromotionDTO;
+import com.example.backendhoatuoiuit.mapper.ProductViewMapper;
+import com.example.backendhoatuoiuit.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -9,13 +12,29 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private PromotionService promotionService;
+
+    @Autowired
+
+    private ReviewService reviewService;
+    @Autowired
+    private ProductViewMapper productViewMapper;
+
+    @Autowired
+    private WishlistService wishlistService;
 
     @GetMapping("/featured")
     public List<ProductDTO> getFeaturedProducts() {
@@ -38,9 +57,23 @@ public class ProductController {
     }
 
     @GetMapping("/{id}/related")
-    public List<ProductDTO> getRelatedProducts(@PathVariable Integer id) {
-        return productService.getRelatedProducts(id);
+    public List<ProductViewDTO> getRelatedProducts(@PathVariable Integer id,
+                                                   @RequestParam(required = false) Integer customerId) {
+        List<ProductDTO> related = productService.getRelatedProducts(id);
+
+        Set<Integer> favoritedProductIds = (customerId != null)
+                ? new HashSet<>(wishlistService.getAllProductIdsInWishlist(customerId))
+                : Collections.emptySet();
+
+        return related.stream().map(product -> {
+            PromotionDTO promo = promotionService.getActivePromotionForProduct(product.getId());
+            Double rating = reviewService.getAverageRatingByProductId(product.getId());
+            boolean isFavorited = favoritedProductIds.contains(product.getId());
+
+            return productViewMapper.toProductViewDTO(product, promo, rating, isFavorited);
+        }).toList();
     }
+
 
     @GetMapping("/most-discounted")
     public List<ProductDTO> getMostDiscountedProducts(@RequestParam(defaultValue = "10") int limit) {
@@ -108,4 +141,38 @@ public class ProductController {
         productService.assignFlowers(id, flowerIds);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/{id}/detail")
+    public ProductViewDTO getProductDetail(@PathVariable Integer id,
+                                           @RequestParam(required = false) Integer customerId) {
+        ProductDTO product = productService.getProductById(id);
+        PromotionDTO promotion = promotionService.getActivePromotionForProduct(id);
+        Double rating = reviewService.getAverageRatingByProductId(id);
+
+        boolean isFavorited = (customerId != null)
+                && wishlistService.isProductInWishlist(customerId, id);
+
+        return productViewMapper.toProductViewDTO(product, promotion, rating, isFavorited);
+    }
+
+
+    @GetMapping("/view-all")
+    public List<ProductViewDTO> getAllProductViews(@RequestParam(required = false) Integer customerId) {
+        List<ProductDTO> products = productService.getAllActiveProducts();
+
+        // Nếu chưa đăng nhập, trả về danh sách rỗng
+        Set<Integer> favoritedProductIds = (customerId != null)
+                ? new HashSet<>(wishlistService.getAllProductIdsInWishlist(customerId))
+                : Collections.emptySet();
+
+        return products.stream().map(product -> {
+            PromotionDTO promo = promotionService.getActivePromotionForProduct(product.getId());
+            Double rating = reviewService.getAverageRatingByProductId(product.getId());
+            boolean isFavorited = favoritedProductIds.contains(product.getId());
+
+            return productViewMapper.toProductViewDTO(product, promo, rating, isFavorited);
+        }).collect(Collectors.toList());
+    }
+
+
 }

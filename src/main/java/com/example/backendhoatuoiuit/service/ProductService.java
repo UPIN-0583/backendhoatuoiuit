@@ -1,6 +1,7 @@
 package com.example.backendhoatuoiuit.service;
 
 import com.example.backendhoatuoiuit.dto.ProductDTO;
+import com.example.backendhoatuoiuit.dto.PromotionDTO;
 import com.example.backendhoatuoiuit.entity.*;
 import com.example.backendhoatuoiuit.mapper.ProductMapper;
 import com.example.backendhoatuoiuit.repository.ProductFlowerRepository;
@@ -231,6 +232,11 @@ public class ProductService {
             pf.setFlower(new Flower(flowerId));
             productFlowerRepository.save(pf);
         }
+    }
+
+    public List<ProductDTO> getAllActiveProducts() {
+        List<Product> products = productRepository.findByIsActiveTrue();
+        return products.stream().map(productMapper::toDTO).collect(Collectors.toList());
     }
 
 
