@@ -7,6 +7,7 @@ import com.example.backendhoatuoiuit.mapper.OrderMapper;
 import com.example.backendhoatuoiuit.repository.CartRepository;
 import com.example.backendhoatuoiuit.repository.OrderProductRepository;
 import com.example.backendhoatuoiuit.repository.OrderRepository;
+import com.example.backendhoatuoiuit.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,9 @@ public class OrderService {
 
     @Autowired
     private OrderMapper orderMapper;
+
+    @Autowired
+    private ProductRepository productRepository;
 
     public List<OrderDTO> getAllOrders() {
         return orderRepository.findAll().stream().map(orderMapper::toDTO).collect(Collectors.toList());
@@ -383,6 +387,49 @@ public class OrderService {
         List<Order> orders = orderRepository.findByCustomerId(customerId);
         return orders.stream().map(orderMapper::toDTO).collect(Collectors.toList());
     }
+
+    @Transactional
+    public OrderDTO createOrderDirect(Integer customerId, Integer productId, Integer quantity) {
+        if (quantity <= 0) {
+            throw new RuntimeException("Số lượng sản phẩm phải lớn hơn 0");
+        }
+
+        // Lấy sản phẩm từ CSDL
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
+
+        // Tính giá và giảm giá
+        BigDecimal price = product.getPrice();
+        BigDecimal discountPercent = getDiscountPercentForProduct(product); // VD: 10%
+        BigDecimal discountApplied = price.multiply(discountPercent)
+                .divide(BigDecimal.valueOf(100), 2, BigDecimal.ROUND_HALF_UP);
+        BigDecimal priceAfterDiscount = price.subtract(discountApplied);
+
+        // Tạo đối tượng đơn hàng
+        Order order = new Order();
+        Customer customer = new Customer();
+        customer.setId(customerId);
+        order.setCustomer(customer);
+        order.setOrderDate(LocalDateTime.now());
+        order.setDeliveryAddress(""); // sẽ cập nhật sau
+        order.setStatus(OrderStatus.PENDING);
+        order.setTotalAmount(priceAfterDiscount.multiply(BigDecimal.valueOf(quantity)));
+
+        order = orderRepository.save(order);
+
+        // Tạo OrderProduct
+        OrderProduct orderProduct = new OrderProduct();
+        orderProduct.setOrder(order);
+        orderProduct.setProduct(product);
+        orderProduct.setQuantity(quantity);
+        orderProduct.setPrice(price);
+        orderProduct.setDiscountApplied(discountApplied);
+
+        orderProductRepository.save(orderProduct);
+
+        return orderMapper.toDTO(order);
+    }
+
 
 
 }

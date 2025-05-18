@@ -185,6 +185,16 @@ public class OrderController {
         return orderService.getOrderCountInRange(LocalDate.parse(start), LocalDate.parse(end));
     }
 
+    @PostMapping("/create-direct")
+    @PreAuthorize("hasRole('USER')")
+    public OrderDTO createOrderDirect(
+            @RequestParam Integer customerId,
+            @RequestParam Integer productId,
+            @RequestParam Integer quantity
+    ) {
+        return orderService.createOrderDirect(customerId, productId, quantity);
+    }
+
 
 
 }
