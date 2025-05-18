@@ -24,8 +24,7 @@ public class SecurityConfig {
         http
                 .cors().and().csrf().disable()
                 .authorizeHttpRequests()
-                // ✅ Public: login, signup, ảnh
-                .requestMatchers("/api/customers/login", "/api/customers/signup", "/uploads/**").permitAll()
+                        .requestMatchers("/api/customers/login", "/api/customers/signup", "/uploads/**", "/api/forgotpass").permitAll()
                 .requestMatchers(HttpMethod.GET,
                         "/api/categories/**",
                         "/api/flowers/**",
