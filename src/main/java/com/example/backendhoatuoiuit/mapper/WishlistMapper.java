@@ -6,6 +6,8 @@ import com.example.backendhoatuoiuit.entity.Wishlist;
 import com.example.backendhoatuoiuit.entity.WishlistItem;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
@@ -15,7 +17,10 @@ public class WishlistMapper {
         WishlistDTO dto = new WishlistDTO();
         dto.setId(wishlist.getId());
         dto.setCustomerId(wishlist.getCustomer().getId());
-        dto.setItems(wishlist.getItems().stream().map(this::toItemDTO).collect(Collectors.toList()));
+        List<WishlistItemDTO> itemDTOs = wishlist.getItems() != null
+                ? wishlist.getItems().stream().map(this::toItemDTO).toList()
+                : new ArrayList<>();
+        dto.setItems(itemDTOs);
         return dto;
     }
 
@@ -27,6 +32,7 @@ public class WishlistMapper {
         dto.setProductName(item.getProduct().getName());
         dto.setImageUrl(item.getProduct().getImageUrl());
         dto.setPrice(item.getProduct().getPrice().doubleValue());
+        dto.setAddedDate(item.getAddedDate());
         return dto;
     }
 }

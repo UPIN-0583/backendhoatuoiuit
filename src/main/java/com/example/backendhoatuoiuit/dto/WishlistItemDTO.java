@@ -2,6 +2,8 @@ package com.example.backendhoatuoiuit.dto;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 public class WishlistItemDTO {
     private Integer id;
@@ -11,4 +13,6 @@ public class WishlistItemDTO {
     private String productName;
     private String imageUrl;
     private Double price;
+    private LocalDateTime addedDate;
+
 }
