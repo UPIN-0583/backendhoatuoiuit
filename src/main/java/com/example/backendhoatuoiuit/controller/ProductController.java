@@ -57,9 +57,23 @@ public class ProductController {
     }
 
     @GetMapping("/{id}/related")
-    public List<ProductDTO> getRelatedProducts(@PathVariable Integer id) {
-        return productService.getRelatedProducts(id);
+    public List<ProductViewDTO> getRelatedProducts(@PathVariable Integer id,
+                                                   @RequestParam(required = false) Integer customerId) {
+        List<ProductDTO> related = productService.getRelatedProducts(id);
+
+        Set<Integer> favoritedProductIds = (customerId != null)
+                ? new HashSet<>(wishlistService.getAllProductIdsInWishlist(customerId))
+                : Collections.emptySet();
+
+        return related.stream().map(product -> {
+            PromotionDTO promo = promotionService.getActivePromotionForProduct(product.getId());
+            Double rating = reviewService.getAverageRatingByProductId(product.getId());
+            boolean isFavorited = favoritedProductIds.contains(product.getId());
+
+            return productViewMapper.toProductViewDTO(product, promo, rating, isFavorited);
+        }).toList();
     }
+
 
     @GetMapping("/most-discounted")
     public List<ProductDTO> getMostDiscountedProducts(@RequestParam(defaultValue = "10") int limit) {
