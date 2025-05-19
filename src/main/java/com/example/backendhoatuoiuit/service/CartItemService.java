@@ -7,6 +7,7 @@ import com.example.backendhoatuoiuit.entity.Product;
 import com.example.backendhoatuoiuit.repository.CartItemRepository;
 import com.example.backendhoatuoiuit.repository.CartRepository;
 import com.example.backendhoatuoiuit.mapper.CartMapper;
+import com.example.backendhoatuoiuit.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,27 +26,30 @@ public class CartItemService {
     @Autowired
     private CartMapper cartMapper;
 
+    @Autowired
+    private ProductRepository productRepository;
+
 
     public CartItemDTO addItemToCart(CartItemDTO dto) {
         Cart cart = cartRepository.findById(dto.getCartId())
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
 
-        // Kiểm tra item đã tồn tại chưa (cùng cartId & productId)
         Optional<CartItem> existingItemOpt = cartItemRepository
                 .findByCartIdAndProductId(dto.getCartId(), dto.getProductId());
 
         CartItem item;
         if (existingItemOpt.isPresent()) {
-            // Nếu đã tồn tại, tăng số lượng
             item = existingItemOpt.get();
             item.setQuantity(item.getQuantity() + dto.getQuantity());
         } else {
-            // Nếu chưa, tạo mới
             item = new CartItem();
             item.setCart(cart);
-            Product product = new Product();
-            product.setId(dto.getProductId());
+
+            // ✅ Load đầy đủ Product từ DB
+            Product product = productRepository.findById(dto.getProductId())
+                    .orElseThrow(() -> new RuntimeException("Product not found"));
             item.setProduct(product);
+
             item.setQuantity(dto.getQuantity());
         }
 
@@ -53,6 +57,7 @@ public class CartItemService {
 
         return cartMapper.toItemDTO(item);
     }
+
 
     public Integer getCartItemCountByCustomerId(Integer customerId) {
 

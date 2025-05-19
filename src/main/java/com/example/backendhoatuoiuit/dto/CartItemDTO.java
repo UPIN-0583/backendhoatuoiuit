@@ -14,4 +14,6 @@ public class CartItemDTO {
     private Double price;
     private LocalDateTime addedDate;
     private Integer quantity;
+    private Double discountApplied;
+    private Double priceAfterDiscount;
 }
