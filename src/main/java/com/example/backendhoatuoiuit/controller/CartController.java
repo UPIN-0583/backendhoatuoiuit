@@ -57,4 +57,14 @@ public class CartController {
     public BigDecimal getCartTotal(@PathVariable Integer cartId) {
         return cartItemService.calculateCartTotal(cartId);
     }
+
+    @PutMapping("/{customerId}/items/{itemId}/quantity")
+    public CartItemDTO updateItemQuantityWithCustomerId(
+            @PathVariable Integer customerId,
+            @PathVariable Integer itemId,
+            @RequestParam("quantity") Integer quantity) {
+
+        return cartItemService.updateQuantityByCustomer(itemId, quantity);
+    }
+
 }

@@ -101,4 +101,18 @@ public class CartItemService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
+    public CartItemDTO updateQuantityByCustomer(Integer itemId, Integer quantity) {
+        CartItem item = cartItemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("CartItem not found"));
+
+        if (quantity <= 0) {
+            throw new RuntimeException("Quantity must be greater than 0");
+        }
+
+        item.setQuantity(quantity);
+        item = cartItemRepository.save(item);
+
+        return cartMapper.toItemDTO(item);
+    }
+
 }
