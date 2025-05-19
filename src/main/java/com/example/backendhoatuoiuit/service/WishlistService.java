@@ -8,6 +8,9 @@ import com.example.backendhoatuoiuit.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Service
 public class WishlistService {
 
@@ -33,8 +36,23 @@ public class WishlistService {
                     return wishlistRepository.save(newWishlist);
                 });
 
+
+        List<WishlistItem> items = wishlist.getItems();
+        if (items != null) {
+            items.sort((a, b) -> {
+                LocalDateTime da = a.getAddedDate();
+                LocalDateTime db = b.getAddedDate();
+                if (da == null && db == null) return 0;
+                if (da == null) return 1;
+                if (db == null) return -1;
+                return db.compareTo(da);
+            });
+        }
+
+
         return wishlistMapper.toDTO(wishlist);
     }
+
 
     public WishlistItemDTO addItemToWishlist(WishlistItemDTO itemDTO) {
         Wishlist wishlist = wishlistRepository.findByCustomerId(itemDTO.getCustomerId())
@@ -58,4 +76,21 @@ public class WishlistService {
     public void removeItemFromWishlist(Integer itemId) {
         wishlistItemRepository.deleteById(itemId);
     }
+
+    public boolean isProductInWishlist(Integer customerId, Integer productId) {
+        return wishlistItemRepository.existsByCustomerIdAndProductId(customerId, productId);
+    }
+
+    public List<Integer> getAllProductIdsInWishlist(Integer customerId) {
+        return wishlistItemRepository.findAllProductIdsInWishlist(customerId);
+    }
+
+    public void removeItemByCustomerIdAndProductId(Integer customerId, Integer productId) {
+        WishlistItem item = wishlistItemRepository
+                .findByCustomerIdAndProductId(customerId, productId)
+                .orElseThrow(() -> new RuntimeException("Wishlist item not found"));
+        wishlistItemRepository.delete(item);
+    }
+
+
 }

@@ -159,37 +159,34 @@ public class CustomerService {
     @Transactional
     public CustomerDTO signupCustomer(SignupRequestDTO signupRequest) {
         logger.info("Signing up new customer with email: {}", signupRequest.getEmail());
-        // Kiểm tra email và phone
+
         if (customerRepository.findByEmail(signupRequest.getEmail()).isPresent()) {
             throw new CustomException("Email đã tồn tại", 400);
         }
-//        if (customerRepository.findByPhone(signupRequest.getPhone()).isPresent()) {
-//            throw new CustomException("Số điện thoại đã tồn tại", 400);
-//        }
 
-        // Kiểm tra định dạng email (cơ bản)
         if (!signupRequest.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
             throw new CustomException("Email không hợp lệ", 400);
         }
 
-        // Kiểm tra độ dài mật khẩu (ví dụ: tối thiểu 8 ký tự)
         if (signupRequest.getPassword().length() < 8) {
             throw new CustomException("Mật khẩu phải có ít nhất 8 ký tự", 400);
         }
 
         Customer customer = new Customer();
-        customer.setName(signupRequest.getName());
         customer.setEmail(signupRequest.getEmail());
-        customer.setPhone(signupRequest.getPhone());
-        customer.setAddress(signupRequest.getAddress());
-        customer.setIsActive(true);
         customer.setPasswordHash(passwordEncoder.encode(signupRequest.getPassword()));
+        customer.setIsActive(true);
+        customer.setRole("USER");
 
-        String role = signupRequest.getRole() != null ? signupRequest.getRole() : "USER";
-        customer.setRole(role);
+        // Gán mặc định các trường còn lại (tùy nhu cầu có thể để null)
+        customer.setName("Người dùng mới");
+        customer.setPhone(null);
+        customer.setAddress(null);
 
         Customer savedCustomer = customerRepository.save(customer);
         logger.info("Customer signed up successfully with email: {}", signupRequest.getEmail());
+
         return customerMapper.toDTO(savedCustomer);
     }
+
 }

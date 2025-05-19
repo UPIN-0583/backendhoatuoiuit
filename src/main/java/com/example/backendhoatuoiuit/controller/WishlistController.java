@@ -5,7 +5,6 @@ import com.example.backendhoatuoiuit.dto.WishlistItemDTO;
 import com.example.backendhoatuoiuit.service.WishlistService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +22,17 @@ public class WishlistController {
         return wishlistService.getWishlistByCustomerId(customerId);
     }
 
+    @GetMapping("/{customerId}/contains/{productId}")
+    public boolean isProductInWishlist(@PathVariable Integer customerId,
+                                       @PathVariable Integer productId) {
+        return wishlistService.isProductInWishlist(customerId, productId);
+    }
+
+    @GetMapping("/{customerId}/product-ids")
+    public List<Integer> getWishlistProductIds(@PathVariable Integer customerId) {
+        return wishlistService.getAllProductIdsInWishlist(customerId);
+    }
+
 
     @PostMapping("/items")
     public WishlistItemDTO addItem(@RequestBody WishlistItemDTO itemDTO) {
@@ -33,4 +43,11 @@ public class WishlistController {
     public void removeItem(@PathVariable Integer itemId) {
         wishlistService.removeItemFromWishlist(itemId);
     }
+
+    @DeleteMapping("/items")
+    public void removeItem(@RequestParam Integer customerId,
+                           @RequestParam Integer productId) {
+        wishlistService.removeItemByCustomerIdAndProductId(customerId, productId);
+    }
+
 }
