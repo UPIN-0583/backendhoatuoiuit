@@ -18,10 +18,6 @@ public class ForgotPasswordController {
     public ResponseEntity<?> forgotPass(@RequestBody Map<String, String> body) {
         String userEmail = body.get("user_email");
         Map<String, Object> result = forgotPasswordService.sendCode(userEmail);
-        if ((boolean) result.get("success")) {
-            return ResponseEntity.ok(result);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
-        }
+        return ResponseEntity.ok(result);
     }
 } 
