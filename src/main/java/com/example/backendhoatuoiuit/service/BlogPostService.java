@@ -53,6 +53,7 @@ public class BlogPostService {
         post.setThumbnailUrl(dto.getThumbnailUrl());
         post.setAuthor(dto.getAuthor());
         post.setIsActive(dto.getIsActive());
+        post.setTags(dto.getTags());
         post = blogPostRepository.save(post);
         return blogPostMapper.toDTO(post);
     }
