@@ -17,6 +17,7 @@ public class BlogPostMapper {
         dto.setCreatedAt(blogPost.getCreatedAt());
         dto.setUpdatedAt(blogPost.getUpdatedAt());
         dto.setIsActive(blogPost.getIsActive());
+        dto.setTags(blogPost.getTags());
         return dto;
     }
 
@@ -28,6 +29,7 @@ public class BlogPostMapper {
         blogPost.setThumbnailUrl(dto.getThumbnailUrl());
         blogPost.setAuthor(dto.getAuthor());
         blogPost.setIsActive(dto.getIsActive());
+        blogPost.setTags(dto.getTags());
 
         return blogPost;
     }

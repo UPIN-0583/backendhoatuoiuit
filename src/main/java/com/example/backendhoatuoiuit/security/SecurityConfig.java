@@ -24,7 +24,7 @@ public class SecurityConfig {
         http
                 .cors().and().csrf().disable()
                 .authorizeHttpRequests()
-                        .requestMatchers("/api/customers/login", "/api/customers/signup", "/uploads/**", "/api/forgotpass", "/api/confirm").permitAll()
+                        .requestMatchers("/api/customers/login", "/api/customers/signup", "/uploads/**", "/api/forgotpass", "/api/confirm","/chatbot/suggest").permitAll()
                 .requestMatchers(HttpMethod.GET,
                         "/api/categories/**",
                         "/api/flowers/**",

@@ -11,6 +11,7 @@ public class BlogPostDTO {
     private String content;
     private String thumbnailUrl;
     private String author;
+    private String tags;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Boolean isActive;

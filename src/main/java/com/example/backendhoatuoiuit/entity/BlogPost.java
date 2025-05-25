@@ -29,6 +29,9 @@ public class BlogPost {
     @Column(length = 100)
     private String author;
 
+    @Column(length = 100)
+    private String tags;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
