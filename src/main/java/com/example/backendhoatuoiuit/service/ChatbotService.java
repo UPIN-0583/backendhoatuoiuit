@@ -34,7 +34,7 @@ public class ChatbotService {
         Map<String, Object> payload = Map.of(
                 "model", "mistralai/devstral-small:free",  // Model miễn phí
                 "messages", List.of(
-                        Map.of("role", "system", "content", "Bạn là chuyên gia gợi ý hoa, trả lời câu hỏi người dùng một cách tự nhiên, ngắn gọn và đầy đủ. Chỉ gợi ý loại hoa"),
+                        Map.of("role", "system", "content", "Bạn là chuyên gia gợi ý hoa. Khi người dùng hỏi, hãy trả lời tên từ 2 đến 3 loại hoa, mỗi tên hoa phải đầy đủ, bao gồm từ 'hoa' và tên loại, không thêm chi tiết khác."),
                         Map.of("role", "user", "content", question)
                 )
         );
