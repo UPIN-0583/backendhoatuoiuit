@@ -280,7 +280,7 @@ public class ChatbotService {
                                     "flower", flower,
                                     "productName", rs.getString("name"),
                                     "image", rs.getString("image_url"),
-                                    "link", "https://hoatuoiuit.id.vn/products/" + createSlug(rs.getString("name"))
+                                    "link", "/products/" + createSlug(rs.getString("name"))
                             )
                     );
                     System.out.println("Product list for " + flower + ": " + productList);
