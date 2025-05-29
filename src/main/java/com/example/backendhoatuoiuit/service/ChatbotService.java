@@ -32,7 +32,7 @@ public class ChatbotService {
         headers.setBearerAuth(OPENROUTER_API_KEY);
 
         Map<String, Object> payload = Map.of(
-                "model", "mistralai/mistral-nemo:free",
+                "model", "deepseek/deepseek-r1-0528:free",
                 "messages", List.of(
                         Map.of("role", "system", "content", "Bạn là chuyên gia gợi ý hoa tại Việt Nam. Luôn trả lời bằng tiếng Việt. Khi người dùng hỏi, hãy trả lời tên từ 2 đến 3 loại hoa, mỗi tên hoa phải đầy đủ, bao gồm từ 'hoa' và tên loại, không thêm chi tiết khác."),
                         Map.of("role", "user", "content", question)
