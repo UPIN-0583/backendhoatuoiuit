@@ -5,6 +5,7 @@ import com.example.backendhoatuoiuit.entity.BlogPost;
 import com.example.backendhoatuoiuit.mapper.BlogPostMapper;
 import com.example.backendhoatuoiuit.repository.BlogPostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public class BlogPostService {
     private BlogPostMapper blogPostMapper;
 
     public List<BlogPostDTO> getAllPosts() {
-        return blogPostRepository.findAll()
+        return blogPostRepository.findAll(Sort.by(Sort.Direction.ASC, "id"))
                 .stream()
                 .map(blogPostMapper::toDTO)
                 .collect(Collectors.toList());

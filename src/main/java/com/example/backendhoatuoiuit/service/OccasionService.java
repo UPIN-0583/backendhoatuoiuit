@@ -5,6 +5,7 @@ import com.example.backendhoatuoiuit.entity.Occasion;
 import com.example.backendhoatuoiuit.mapper.OccasionMapper;
 import com.example.backendhoatuoiuit.repository.OccasionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public class OccasionService {
     private OccasionMapper occasionMapper;
 
     public List<OccasionDTO> getAllOccasions() {
-        List<Occasion> occasions = occasionRepository.findAll();
+        List<Occasion> occasions = occasionRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
         return occasions.stream().map(occasionMapper::toDTO).collect(Collectors.toList());
     }
 

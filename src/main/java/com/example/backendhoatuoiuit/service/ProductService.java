@@ -40,7 +40,7 @@ public class ProductService {
     private ProductOccasionRepository productOccasionRepository;
 
     public List<ProductDTO> getAllProducts() {
-        List<Product> products = productRepository.findAll();
+        List<Product> products = productRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
         return products.stream().map(productMapper::toDTO).collect(Collectors.toList());
     }
 

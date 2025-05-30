@@ -10,6 +10,7 @@ import com.example.backendhoatuoiuit.repository.OrderRepository;
 import com.example.backendhoatuoiuit.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +41,7 @@ public class OrderService {
     private ProductRepository productRepository;
 
     public List<OrderDTO> getAllOrders() {
-        return orderRepository.findAll().stream().map(orderMapper::toDTO).collect(Collectors.toList());
+        return orderRepository.findAll(Sort.by(Sort.Direction.ASC, "id")).stream().map(orderMapper::toDTO).collect(Collectors.toList());
     }
 
     public OrderDTO getOrderById(Integer id) {
@@ -50,6 +51,15 @@ public class OrderService {
 
     public OrderDTO createOrder(OrderDTO orderDTO) {
         Order order = orderMapper.toEntity(orderDTO);
+        if (order.getOrderProducts() != null) {
+            BigDecimal total = order.getOrderProducts().stream()
+                    .map(op -> op.getPrice()
+                            .subtract(op.getDiscountApplied())
+                            .multiply(BigDecimal.valueOf(op.getQuantity()))
+                    )
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            order.setTotalAmount(total);
+        }
         order = orderRepository.save(order);
         return orderMapper.toDTO(order);
     }

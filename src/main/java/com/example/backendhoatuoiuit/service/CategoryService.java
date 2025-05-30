@@ -5,6 +5,7 @@ import com.example.backendhoatuoiuit.entity.Category;
 import com.example.backendhoatuoiuit.mapper.CategoryMapper;
 import com.example.backendhoatuoiuit.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public class CategoryService {
     private CategoryMapper categoryMapper;
 
     public List<CategoryDTO> getAllCategories() {
-        List<Category> categories = categoryRepository.findAll();
+        List<Category> categories = categoryRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
         return categories.stream().map(categoryMapper::toDTO).collect(Collectors.toList());
     }
 

@@ -6,6 +6,7 @@ import com.example.backendhoatuoiuit.entity.Flower;
 import com.example.backendhoatuoiuit.mapper.FlowerMapper;
 import com.example.backendhoatuoiuit.repository.FlowerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public class FlowerService {
     private FlowerMapper flowerMapper;
 
     public List<FlowerDTO> getAllFlowers() {
-        List<Flower> flowers = flowerRepository.findAll();
+        List<Flower> flowers = flowerRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
         return flowers.stream().map(flowerMapper::toDTO).collect(Collectors.toList());
     }
 

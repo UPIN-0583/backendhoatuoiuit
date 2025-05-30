@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -49,7 +50,7 @@ public class CustomerService {
     @Transactional
     public List<CustomerDTO> getAllCustomers() {
         logger.info("Fetching all customers");
-        List<Customer> customers = customerRepository.findAll();
+        List<Customer> customers = customerRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
         return customers.stream().map(customerMapper::toDTO).collect(Collectors.toList());
     }
 

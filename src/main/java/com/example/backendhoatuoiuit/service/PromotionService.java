@@ -9,6 +9,7 @@ import com.example.backendhoatuoiuit.mapper.PromotionMapper;
 import com.example.backendhoatuoiuit.repository.ProductDiscountRepository;
 import com.example.backendhoatuoiuit.repository.PromotionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +30,7 @@ public class PromotionService {
 
 
     public List<PromotionDTO> getAllPromotions() {
-        List<Promotion> promotions = promotionRepository.findAll();
+        List<Promotion> promotions = promotionRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
         return promotions.stream().map(promotionMapper::toDTO).collect(Collectors.toList());
     }
 

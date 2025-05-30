@@ -78,6 +78,21 @@ public class OrderMapper {
             order.setPayment(payment);
         }
 
+        if (dto.getItems() != null) {
+            List<OrderProduct> orderProducts = dto.getItems().stream().map(itemDTO -> {
+                OrderProduct op = new OrderProduct();
+                op.setOrder(order);
+                Product product = new Product();
+                product.setId(itemDTO.getProductId());
+                op.setProduct(product);
+                op.setQuantity(itemDTO.getQuantity());
+                op.setPrice(itemDTO.getPrice());
+                op.setDiscountApplied(itemDTO.getDiscountApplied() != null ? itemDTO.getDiscountApplied() : BigDecimal.ZERO);
+                return op;
+            }).collect(Collectors.toList());
+            order.setOrderProducts(orderProducts);
+        }
+
         order.setNote(dto.getNote());
         return order;
     }
