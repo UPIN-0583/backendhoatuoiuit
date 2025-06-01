@@ -1,6 +1,7 @@
 package com.example.backendhoatuoiuit.service;
 
 import com.example.backendhoatuoiuit.dto.ProductDTO;
+import com.example.backendhoatuoiuit.dto.ProductViewDTO;
 import com.example.backendhoatuoiuit.dto.PromotionDTO;
 import com.example.backendhoatuoiuit.entity.*;
 import com.example.backendhoatuoiuit.mapper.ProductMapper;
@@ -239,5 +240,9 @@ public class ProductService {
         return products.stream().map(productMapper::toDTO).collect(Collectors.toList());
     }
 
+    public List<ProductDTO> getProductsByFlowerEnglishName(String englishName) {
+        List <Product> products = productRepository.findByFlowerEnglishName(englishName);
+        return  products.stream().map(productMapper::toDTO).collect(Collectors.toList());
+    }
 
 }

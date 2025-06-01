@@ -48,4 +48,8 @@ public interface ProductRepository extends JpaRepository<Product, Integer>, JpaS
 
 
     List<Product> findByCategoryId(Integer categoryId);
+
+    @Query("SELECT p FROM Product p JOIN ProductFlower pf ON p.id = pf.product.id " +
+            "JOIN Flower f ON pf.flower.id = f.id WHERE f.englishName = :englishName")
+    List<Product> findByFlowerEnglishName(String englishName);
 }

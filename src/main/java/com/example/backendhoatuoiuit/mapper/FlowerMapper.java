@@ -13,6 +13,7 @@ public class FlowerMapper {
         dto.setName(flower.getName());
         dto.setDescription(flower.getDescription());
         dto.setIsActive(flower.getIsActive());
+        dto.setEnglishName(flower.getEnglishName());
         return dto;
     }
 
@@ -22,6 +23,7 @@ public class FlowerMapper {
         flower.setName(dto.getName());
         flower.setDescription(dto.getDescription());
         flower.setIsActive(dto.getIsActive());
+        flower.setEnglishName(dto.getEnglishName());
         return flower;
     }
 }

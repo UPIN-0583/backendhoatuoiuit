@@ -174,5 +174,10 @@ public class ProductController {
         }).collect(Collectors.toList());
     }
 
+    @GetMapping("/by-flower")
+    public List<ProductDTO> getProductsByFlower(@RequestParam String englishName) {
+        return productService.getProductsByFlowerEnglishName(englishName);
+    }
+
 
 }

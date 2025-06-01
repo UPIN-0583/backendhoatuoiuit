@@ -28,6 +28,9 @@ public class Flower {
     @Column(nullable = false)
     private Boolean isActive = true;
 
+    @Column(length = 100, unique = true)
+    private String englishName;
+
     public Flower(Integer id) {
         this.id = id;
     }

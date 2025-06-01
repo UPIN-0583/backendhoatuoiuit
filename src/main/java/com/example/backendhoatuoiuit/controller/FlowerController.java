@@ -1,8 +1,12 @@
 package com.example.backendhoatuoiuit.controller;
 
 import com.example.backendhoatuoiuit.dto.FlowerDTO;
+import com.example.backendhoatuoiuit.entity.Flower;
+import com.example.backendhoatuoiuit.mapper.FlowerMapper;
+import com.example.backendhoatuoiuit.repository.FlowerRepository;
 import com.example.backendhoatuoiuit.service.FlowerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,4 +50,15 @@ public class FlowerController {
     public void deleteFlower(@PathVariable Integer id) {
         flowerService.deleteFlower(id);
     }
+
+    @GetMapping("/by-english-name")
+    public ResponseEntity<FlowerDTO> getFlowerByEnglishName(@RequestParam String englishName) {
+        FlowerDTO dto = flowerService.getFlowerByEnglishName(englishName);
+        if (dto != null) {
+            return ResponseEntity.ok(dto);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }

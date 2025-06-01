@@ -58,4 +58,12 @@ public class FlowerService {
                 .map(flowerMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
+    public FlowerDTO getFlowerByEnglishName(String englishName) {
+        Flower flower = flowerRepository.findByEnglishName(englishName);
+        if (flower == null) {
+            return null;  // hoặc throw exception nếu muốn
+        }
+        return flowerMapper.toDTO(flower);
+    }
 }
